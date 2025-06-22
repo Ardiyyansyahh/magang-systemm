@@ -1,0 +1,38 @@
+/* style.css */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f3f4f6;
+}
+
+.login-card {
+    background-color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.register-section {
+    max-width: 28rem;
+}
+
+.dashboard {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.demo-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #3b82f6;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tailwind already handles most responsive and utility classes */
+/* Gunakan class tambahan di sini jika diperlukan kustom tambahan */
