@@ -1,3 +1,24 @@
+<?php
+session_start();
+include '../koneksi.php';
+
+// Pastikan hanya admin yang bisa akses
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../login.html");
+    exit;
+}
+
+// Ambil data dinamis
+$jumlah_mahasiswa = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM users WHERE role = 'mahasiswa'"));
+$jumlah_dosen     = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM users WHERE role = 'dosen'"));
+//$jumlah_instansi  = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM instansi"));
+$jumlah_magang    = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM pendaftaran_magang WHERE status = 'Disetujui'"));
+
+
+$users = mysqli_query($koneksi, "SELECT id, nama, role FROM users WHERE role != 'admin' ORDER BY role, nama");
+
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -6,7 +27,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - SIMAGA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../assets/style.css">
 </head>
 
 <body>
@@ -22,20 +43,26 @@
         </div>
 
         <div class="p-6">
+            <?php if (isset($_GET['edit']) && $_GET['edit'] === 'success'): ?>
+    <div class="mb-4 p-4 bg-green-100 text-green-800 rounded border border-green-300">
+        Akun berhasil diperbarui.
+    </div>
+<?php endif; ?>
+
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
                     <h3 class="font-medium text-purple-800 mb-2">Total Mahasiswa</h3>
-                    <p class="text-2xl font-bold text-purple-600">124</p>
+                    <p class="text-2xl font-bold text-purple-600"><?= $jumlah_mahasiswa ?></p>
                     <p class="text-xs text-gray-500">terdaftar</p>
                 </div>
                 <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
                     <h3 class="font-medium text-blue-800 mb-2">Total Dosen</h3>
-                    <p class="text-2xl font-bold text-blue-600">18</p>
+                    <p class="text-2xl font-bold text-blue-600"><?= $jumlah_dosen ?></p>
                     <p class="text-xs text-gray-500">pembimbing</p>
                 </div>
                 <div class="bg-green-50 p-4 rounded-lg border border-green-100">
                     <h3 class="font-medium text-green-800 mb-2">Magang Aktif</h3>
-                    <p class="text-2xl font-bold text-green-600">87</p>
+                    <p class="text-2xl font-bold text-green-600"><?= $jumlah_magang ?></p>
                     <p class="text-xs text-gray-500">sedang berlangsung</p>
                 </div>
                 <div class="bg-amber-50 p-4 rounded-lg border border-amber-100">
@@ -78,25 +105,23 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-4 py-2 text-sm">Budi Santoso</td>
-                                        <td class="px-4 py-2 text-sm">Mahasiswa</td>
-                                        <td class="px-4 py-2 text-sm"><span
-                                                class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Aktif</span>
-                                        </td>
-                                        <td class="px-4 py-2 text-sm"><button
-                                                class="text-purple-600 hover:underline">Edit</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-4 py-2 text-sm">Dr. Ahmad</td>
-                                        <td class="px-4 py-2 text-sm">Dosen</td>
-                                        <td class="px-4 py-2 text-sm"><span
-                                                class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Aktif</span>
-                                        </td>
-                                        <td class="px-4 py-2 text-sm"><button
-                                                class="text-purple-600 hover:underline">Edit</button></td>
-                                    </tr>
-                                </tbody>
+    <?php
+    include '../koneksi.php'; // Pastikan koneksi dimuat
+    $users = mysqli_query($koneksi, "SELECT nama, role FROM users WHERE role != 'admin' ORDER BY role, nama");
+    while ($u = mysqli_fetch_assoc($users)):
+    ?>
+    <tr>
+        <td class="px-4 py-2 text-sm"><?= htmlspecialchars($u['nama']) ?></td>
+        <td class="px-4 py-2 text-sm"><?= ucfirst($u['role']) ?></td>
+        <td class="px-4 py-2 text-sm">
+            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Aktif</span>
+        </td>
+        <td class="px-4 py-2 text-sm"><a href="../admin/edit-akun.php?id=<?= $u['id'] ?>" class="text-purple-600 hover:underline">Edit</a>
+</td>
+    </tr>
+    <?php endwhile; ?>
+</tbody>
+
                             </table>
                         </div>
                     </div>
@@ -137,9 +162,21 @@
                 </div>
             </div>
 
+
             <div>
                 <!-- 3. Monitoring Aktivitas Magang -->
-                <section>
+                    <section>
+<?php
+                            $monitoring = mysqli_query($koneksi, "
+                            SELECT u.nama, pm.status, 
+                                    (SELECT COUNT(*) FROM laporan_mingguan WHERE mahasiswa_id = u.id) AS laporan, 
+                                    (SELECT COUNT(*) FROM laporan_mingguan WHERE mahasiswa_id = u.id AND komentar != '') AS feedback 
+                            FROM pendaftaran_magang pm 
+                            JOIN users u ON u.id = pm.mahasiswa_id
+                            WHERE pm.status = 'Disetujui'
+                            ");
+?>
+
                     <h2 class="text-lg font-semibold text-gray-700 mb-3">Monitoring Aktivitas Magang</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -152,13 +189,16 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php while($m = mysqli_fetch_assoc($monitoring)): ?>
                                 <tr>
-                                    <td class="px-4 py-2">Siti Rahayu</td>
-                                    <td class="px-4 py-2 text-green-600">Berlangsung</td>
-                                    <td class="px-4 py-2">6</td>
-                                    <td class="px-4 py-2">4 komentar</td>
+                                    <td class="px-4 py-2"><?= htmlspecialchars($m['nama']) ?></td>
+                                    <td class="px-4 py-2 text-green-600"><?= $m['status'] ?></td>
+                                    <td class="px-4 py-2"><?= $m['laporan'] ?></td>
+                                    <td class="px-4 py-2"><?= $m['feedback'] ?> komentar</td>
                                 </tr>
+                                <?php endwhile; ?>
                             </tbody>
+
                         </table>
                     </div>
                 </section>

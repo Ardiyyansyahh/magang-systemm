@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Akun - SIMAGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="flex items-center justify-center min-h-screen">
+    <!-- Tambahkan di dalam <body> -->
+    <form action="../register.php" method="POST" id="mahasiswa-form" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label for="reg-nim">NIM</label>
+                <input type="text" id="reg-nim" name="nim" class="..." placeholder="Masukkan NIM">
+            </div>
+            <div>
+                <label for="reg-angkatan">Angkatan</label>
+                <select id="reg-angkatan" name="angkatan" class="...">
+                    <option value="">Pilih Angkatan</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label for="reg-nama">Nama Lengkap</label>
+            <input type="text" id="reg-nama" name="nama" class="..." placeholder="Masukkan nama lengkap">
+        </div>
+
+        <div>
+            <label for="reg-prodi">Perusahaan Tujuan</label>
+            <select id="reg-prodi" name="perusahaan" class="...">
+                <option value="">Pilih Perusahaan</option>
+                <option value="pt_a">PT A</option>
+                <option value="pt_b">PT B</option>
+                <option value="pt_c">PT C</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" name="email" class="..." placeholder="Masukkan email">
+        </div>
+
+        <div>
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" name="password" class="..." placeholder="Masukkan password">
+        </div>
+
+        <div>
+            <label for="reg-confirm-password">Konfirmasi Password</label>
+            <input type="password" id="reg-confirm-password" name="konfirmasi" class="..."
+                placeholder="Konfirmasi password">
+        </div>
+
+        <div class="mt-6">
+            <button type="submit"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition font-medium">Daftar</button>
+        </div>
+    </form>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>
