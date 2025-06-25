@@ -1,22 +1,17 @@
+<!-- Dashboard Admin - SIMAGA -->
 <?php
 session_start();
 include '../koneksi.php';
 
-// Pastikan hanya admin yang bisa akses
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.html");
     exit;
 }
 
-// Ambil data dinamis
 $jumlah_mahasiswa = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM users WHERE role = 'mahasiswa'"));
-$jumlah_dosen     = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM users WHERE role = 'dosen'"));
-//$jumlah_instansi  = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM instansi"));
-$jumlah_magang    = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM pendaftaran_magang WHERE status = 'Disetujui'"));
-
-
-$users = mysqli_query($koneksi, "SELECT id, nama, role FROM users WHERE role != 'admin' ORDER BY role, nama");
-
+$jumlah_dosen = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM users WHERE role = 'dosen'"));
+$jumlah_magang = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM pendaftaran_magang WHERE status = 'Disetujui'"));
+$users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE role != 'admin' ORDER BY role, nama");
 ?>
 
 <!DOCTYPE html>
@@ -31,218 +26,135 @@ $users = mysqli_query($koneksi, "SELECT id, nama, role FROM users WHERE role != 
 </head>
 
 <body>
-    <!-- Dashboard Admin -->
-    <div id="dashboard-admin" class="w-full max-w-6xl bg-white rounded-xl shadow-lg overflow-hidden mx-auto mt-6">
+    <div class="w-full max-w-6xl bg-white rounded-xl shadow-lg overflow-hidden mx-auto mt-6">
         <div class="bg-purple-600 text-white p-4 flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <h1 class="text-xl font-bold">SIMAGA</h1>
                 <span class="text-sm bg-purple-700 px-2 py-0.5 rounded">Admin</span>
             </div>
-            <button id="logout-admin"
-                class="bg-purple-700 hover:bg-purple-800 px-3 py-1 rounded text-sm">Logout</button>
+            <button id="logout-admin" class="bg-purple-700 hover:bg-purple-800 px-3 py-1 rounded text-sm">Logout</button>
         </div>
 
         <div class="p-6">
             <?php if (isset($_GET['edit']) && $_GET['edit'] === 'success'): ?>
-    <div class="mb-4 p-4 bg-green-100 text-green-800 rounded border border-green-300">
-        Akun berhasil diperbarui.
-    </div>
-<?php endif; ?>
+                <div class="mb-4 p-4 bg-green-100 text-green-800 rounded border border-green-300">
+                    Akun berhasil diperbarui.
+                </div>
+            <?php endif; ?>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                    <h3 class="font-medium text-purple-800 mb-2">Total Mahasiswa</h3>
+                <div class="bg-purple-50 p-4 rounded-lg border">
+                    <h3 class="text-purple-800 mb-2 font-medium">Total Mahasiswa</h3>
                     <p class="text-2xl font-bold text-purple-600"><?= $jumlah_mahasiswa ?></p>
                     <p class="text-xs text-gray-500">terdaftar</p>
                 </div>
-                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <h3 class="font-medium text-blue-800 mb-2">Total Dosen</h3>
+                <div class="bg-blue-50 p-4 rounded-lg border">
+                    <h3 class="text-blue-800 mb-2 font-medium">Total Dosen</h3>
                     <p class="text-2xl font-bold text-blue-600"><?= $jumlah_dosen ?></p>
                     <p class="text-xs text-gray-500">pembimbing</p>
                 </div>
-                <div class="bg-green-50 p-4 rounded-lg border border-green-100">
-                    <h3 class="font-medium text-green-800 mb-2">Magang Aktif</h3>
+                <div class="bg-green-50 p-4 rounded-lg border">
+                    <h3 class="text-green-800 mb-2 font-medium">Magang Aktif</h3>
                     <p class="text-2xl font-bold text-green-600"><?= $jumlah_magang ?></p>
                     <p class="text-xs text-gray-500">sedang berlangsung</p>
                 </div>
-                <div class="bg-amber-50 p-4 rounded-lg border border-amber-100">
-                    <h3 class="font-medium text-amber-800 mb-2">Perusahaan</h3>
+                <div class="bg-amber-50 p-4 rounded-lg border">
+                    <h3 class="text-amber-800 mb-2 font-medium">Perusahaan</h3>
                     <p class="text-2xl font-bold text-amber-600">42</p>
                     <p class="text-xs text-gray-500">mitra magang</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="bg-white border border-gray-200 rounded-lg">
-                    <div class="border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+                <div class="bg-white border rounded-lg">
+                    <div class="border-b px-4 py-3 flex justify-between items-center">
                         <h3 class="font-medium">Manajemen Pengguna</h3>
-                        <button class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">+
-                            Tambah</button>
+                        <a href="../admin/tambah-akun.php" class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">+ Tambah</a>
                     </div>
                     <div class="p-4">
-                        <div class="flex mb-4">
-                            <button class="px-3 py-1 bg-purple-600 text-white rounded-l-lg">Semua</button>
-                            <button class="px-3 py-1 bg-gray-100 text-gray-700 hover:bg-gray-200">Mahasiswa</button>
-                            <button
-                                class="px-3 py-1 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-r-lg">Dosen</button>
-                        </div>
                         <div class="overflow-y-auto max-h-64">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead>
                                     <tr>
-                                        <th
-                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Nama</th>
-                                        <th
-                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Peran</th>
-                                        <th
-                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status</th>
-                                        <th
-                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Aksi</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peran</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
-    <?php
-    include '../koneksi.php'; // Pastikan koneksi dimuat
-    $users = mysqli_query($koneksi, "SELECT nama, role FROM users WHERE role != 'admin' ORDER BY role, nama");
-    while ($u = mysqli_fetch_assoc($users)):
-    ?>
-    <tr>
-        <td class="px-4 py-2 text-sm"><?= htmlspecialchars($u['nama']) ?></td>
-        <td class="px-4 py-2 text-sm"><?= ucfirst($u['role']) ?></td>
-        <td class="px-4 py-2 text-sm">
-            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Aktif</span>
-        </td>
-        <td class="px-4 py-2 text-sm"><a href="../admin/edit-akun.php?id=<?= $u['id'] ?>" class="text-purple-600 hover:underline">Edit</a>
-</td>
-    </tr>
-    <?php endwhile; ?>
-</tbody>
-
+                                    <?php while ($u = mysqli_fetch_assoc($users)): ?>
+                                        <tr>
+                                            <td class="px-4 py-2 text-sm"><?= htmlspecialchars($u['nama']) ?></td>
+                                            <td class="px-4 py-2 text-sm"><?= ucfirst($u['role']) ?></td>
+                                            <td class="px-4 py-2 text-sm">
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Aktif</span>
+                                            </td>
+                                            <td class="px-4 py-2 text-sm space-x-2">
+                                                <a href="../admin/edit-akun.php?id=<?= $u['id'] ?>" class="text-purple-600 hover:underline">Edit</a>
+                                                <form action="../admin/hapus-akun.php" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus akun ini?')">
+                                                    <input type="hidden" name="nim" value="<?= htmlspecialchars($u['nim']) ?>">
+                                                    <button type="submit" class="text-red-600 hover:underline">Hapus</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white border border-gray-200 rounded-lg">
-                    <div class="border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+                <div class="bg-white border rounded-lg">
+                    <div class="border-b px-4 py-3 flex justify-between items-center">
                         <h3 class="font-medium">Perusahaan Mitra</h3>
-                        <button class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">+
-                            Tambah</button>
+                        <a href="../admin/tambah-perusahaan.php" class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">+ Tambah</a>
                     </div>
                     <div class="p-4">
-                        <input type="text" placeholder="Cari perusahaan..."
-                            class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-1 focus:ring-purple-500">
-                        <div class="space-y-3">
-                            <div class="flex items-center p-2 hover:bg-gray-50 rounded-lg border border-gray-100">
-                                <div
-                                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3 text-blue-600 font-bold">
-                                    PT</div>
-                                <div class="flex-1">
-                                    <h4 class="font-medium">PT Teknologi Maju</h4>
-                                    <p class="text-xs text-gray-600">Jakarta • 12 mahasiswa</p>
-                                </div>
-                                <button class="text-purple-600 hover:underline text-sm">Detail</button>
-                            </div>
-                            <div class="flex items-center p-2 hover:bg-gray-50 rounded-lg border border-gray-100">
-                                <div
-                                    class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3 text-green-600 font-bold">
-                                    CV</div>
-                                <div class="flex-1">
-                                    <h4 class="font-medium">CV Digital Kreatif</h4>
-                                    <p class="text-xs text-gray-600">Bandung • 8 mahasiswa</p>
-                                </div>
-                                <button class="text-purple-600 hover:underline text-sm">Detail</button>
-                            </div>
-                        </div>
+                        <input type="text" placeholder="Cari perusahaan..." class="w-full text-sm border rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-1 focus:ring-purple-500">
+                        <!-- Tambahkan perusahaan dinamis di sini jika tersedia -->
                     </div>
                 </div>
             </div>
 
-
-            <div>
-                <!-- 3. Monitoring Aktivitas Magang -->
-                    <section>
-<?php
-                            $monitoring = mysqli_query($koneksi, "
-                            SELECT u.nama, pm.status, 
-                                    (SELECT COUNT(*) FROM laporan_mingguan WHERE mahasiswa_id = u.id) AS laporan, 
-                                    (SELECT COUNT(*) FROM laporan_mingguan WHERE mahasiswa_id = u.id AND komentar != '') AS feedback 
-                            FROM pendaftaran_magang pm 
-                            JOIN users u ON u.id = pm.mahasiswa_id
-                            WHERE pm.status = 'Disetujui'
-                            ");
-?>
-
-                    <h2 class="text-lg font-semibold text-gray-700 mb-3">Monitoring Aktivitas Magang</h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="px-4 py-2">Mahasiswa</th>
-                                    <th class="px-4 py-2">Status Magang</th>
-                                    <th class="px-4 py-2">Laporan Terkirim</th>
-                                    <th class="px-4 py-2">Feedback Dosen</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php while($m = mysqli_fetch_assoc($monitoring)): ?>
+            <!-- Monitoring Aktivitas Magang -->
+            <section>
+                <?php
+                $monitoring = mysqli_query($koneksi, "
+                    SELECT u.nama, pm.status,
+                           (SELECT COUNT(*) FROM laporan_mingguan WHERE mahasiswa_id = u.id) AS laporan,
+                           (SELECT COUNT(*) FROM laporan_mingguan WHERE mahasiswa_id = u.id AND komentar != '') AS feedback
+                    FROM pendaftaran_magang pm
+                    JOIN users u ON u.id = pm.mahasiswa_id
+                    WHERE pm.status = 'Disetujui'
+                ");
+                ?>
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">Monitoring Aktivitas Magang</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2">Mahasiswa</th>
+                                <th class="px-4 py-2">Status Magang</th>
+                                <th class="px-4 py-2">Laporan Terkirim</th>
+                                <th class="px-4 py-2">Feedback Dosen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($m = mysqli_fetch_assoc($monitoring)): ?>
                                 <tr>
                                     <td class="px-4 py-2"><?= htmlspecialchars($m['nama']) ?></td>
                                     <td class="px-4 py-2 text-green-600"><?= $m['status'] ?></td>
                                     <td class="px-4 py-2"><?= $m['laporan'] ?></td>
                                     <td class="px-4 py-2"><?= $m['feedback'] ?> komentar</td>
                                 </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-
-                        </table>
-                    </div>
-                </section>
-            </div>
-
-
-
-            <div class="bg-white border border-gray-200 rounded-lg">
-                <div class="border-b border-gray-200 px-4 py-3 flex justify-between items-center">
-                    <h3 class="font-medium">Pengumuman Sistem</h3>
-                    <button class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">+ Buat
-                        Baru</button>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="p-4 space-y-4">
-                    <div class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-medium">Pendaftaran Magang Periode Juli 2023</h4>
-                            <span class="text-xs text-gray-500">12/06/2023</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-2">Pendaftaran magang untuk periode Juli 2023 telah dibuka.
-                            Mahasiswa dapat mendaftar melalui sistem hingga tanggal 25 Juni 2023.</p>
-                        <div class="flex justify-end">
-                            <button class="text-purple-600 hover:underline text-sm mr-3">Edit</button>
-                            <button class="text-red-600 hover:underline text-sm">Hapus</button>
-                        </div>
-                    </div>
-                    <div class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-medium">Pembaruan Sistem v2.3</h4>
-                            <span class="text-xs text-gray-500">05/06/2023</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-2">Sistem telah diperbarui ke versi 2.3 dengan beberapa
-                            perbaikan dan fitur baru. Silakan lihat dokumentasi untuk detail lebih lanjut.</p>
-                        <div class="flex justify-end">
-                            <button class="text-purple-600 hover:underline text-sm mr-3">Edit</button>
-                            <button class="text-red-600 hover:underline text-sm">Hapus</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </section>
         </div>
     </div>
-
-    <script src="script.js"></script>
 </body>
 
 </html>

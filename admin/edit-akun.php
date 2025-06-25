@@ -42,6 +42,13 @@ $user = mysqli_fetch_assoc($query);
             </div>
 
             <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Angkatan</label>
+                <input type="number" name="angkatan" value="<?= htmlspecialchars($user['angkatan']) ?>" 
+                       class="w-full px-3 py-2 border rounded-lg" required>
+            </div>
+
+
+            <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Role</label>
                 <select name="role" class="w-full px-3 py-2 border rounded-lg" required>
                     <option value="mahasiswa" <?= $user['role'] == 'mahasiswa' ? 'selected' : '' ?>>Mahasiswa</option>

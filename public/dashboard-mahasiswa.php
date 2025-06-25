@@ -32,6 +32,10 @@ $laporan = mysqli_query($koneksi, "SELECT * FROM laporan_mingguan WHERE mahasisw
 
         <h1 class="text-2xl font-bold mb-4">Dashboard Mahasiswa</h1>
 
+        <p>Nama Mahasiswa <?= $_SESSION['nama'] ?></p>
+        <p class="text-sm text-gray-600 mb-10">Role: <?= ucfirst($_SESSION['role']) ?></p>
+        <p class="mb-10">Anda dapat mengelola pendaftaran magang, mengunggah dokumen, dan membuat laporan mingguan di sini.</p>
+
         <!-- STATUS PENDAFTARAN -->
         <h2 class="text-xl font-semibold mb-2">Status Pendaftaran Magang</h2>
         <?php if ($p = mysqli_fetch_assoc($pendaftaran)): ?>
