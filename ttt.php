@@ -2,20 +2,16 @@
 session_start();
 include '../koneksi.php';
 
-// Pastikan hanya admin yang bisa mengakses
+// Pastikan user adalah admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.html");
     exit;
 }
 
-// Validasi metode dan input
+// Validasi metode & input
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
-    $id = intval($_POST['id']);
+    $id = (int) $_POST['id'];
 
-    // Hapus dokumen yang berkaitan terlebih dahulu
-    mysqli_query($koneksi, "DELETE FROM dokumen_magang WHERE mahasiswa_id = $id");
-
-    // Kemudian hapus dari tabel users
     $hapus = mysqli_query($koneksi, "DELETE FROM users WHERE id = $id");
 
     if ($hapus) {

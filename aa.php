@@ -8,12 +8,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'dosen') {
 }
 
 // Ambil semua dokumen magang mahasiswa
+
+
 $dokumenQuery = "SELECT dm.*, u.nama FROM dokumen_magang dm 
                  JOIN users u ON dm.mahasiswa_id = u.id 
                  WHERE u.role = 'mahasiswa' 
                  ORDER BY dm.uploaded_at DESC";
 
-$result = mysqli_query($koneksi, $dokumenQuery);
+
+$result = mysqli_query($koneksi, $query);
 ?>
 
 <!DOCTYPE html>
@@ -46,17 +49,17 @@ $result = mysqli_query($koneksi, $dokumenQuery);
                     $files = explode(',', $row['file_path']);
                     ?>
                     <tr class="border-t hover:bg-gray-50">
-                        <td class="p-2 border"><?= $no++ ?></td>
-                        <td class="p-2 border"><?= htmlspecialchars($row['nama']) ?></td>
-                        <td class="p-2 border"><?= htmlspecialchars($row['judul']) ?></td>
+                        <td class="p-2 border"><?php echo $no++; ?></td>
+                        <td class="p-2 border"><?php echo htmlspecialchars($row['mahasiswa']); ?></td>
+                        <td class="p-2 border"><?php echo htmlspecialchars($row['judul']); ?></td>
                         <td class="p-2 border space-y-1">
                             <?php foreach ($files as $file): ?>
-                                <a href="../uploads/<?= trim($file) ?>" class="text-blue-600 underline" target="_blank">
-                                    <?= basename($file) ?>
+                                <a href="../uploads/<?php echo trim($file); ?>" class="text-blue-600 underline" target="_blank">
+                                    <?php echo basename($file); ?>
                                 </a><br>
                             <?php endforeach; ?>
                         </td>
-                        <td class="p-2 border"><?= date('d-m-Y H:i', strtotime($row['uploaded_at'])) ?></td>
+                        <td class="p-2 border"><?php echo date('d-m-Y H:i', strtotime($row['uploaded_at'])); ?></td>
                     </tr>
                 <?php endwhile; ?>
             </tbody>

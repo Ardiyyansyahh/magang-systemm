@@ -30,11 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title>Tambah Perusahaan Mitra</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 py-10">
     <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <h1 class="text-2xl font-bold mb-4">Tambah Perusahaan Mitra</h1>
@@ -59,10 +61,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" name="kontak" class="w-full border px-3 py-2 rounded" />
             </div>
             <div class="flex justify-between items-center">
-                <a href="../public/dashboard-admin.php" class="text-sm text-gray-600 hover:underline">← Kembali</a>
-                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Simpan</button>
+                <a href="../public/dashboard-admin.php"
+                    class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">← Kembali</a>
+                <a href="../public/dashboard-admin.php"
+                    class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700"> Simpan</a>
             </div>
+
         </form>
     </div>
 </body>
+
 </html>

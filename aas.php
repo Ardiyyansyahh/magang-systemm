@@ -7,23 +7,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = mysqli_real_escape_string($koneksi, $_POST['nama']);
     $email = mysqli_real_escape_string($koneksi, $_POST['email']);
     $password = $_POST['password'];
-    $nim = $_POST['nim'] ?? null;
-    $angkatan = $_POST['angkatan'] ?? null;
-    $fakultas = $_POST['fakultas'] ?? null;
-    $bidang_keahlian = $_POST['bidang_keahlian'] ?? null;
+    $nim = $_POST['nim'];
+    $angkatan = $_POST['angkatan'];
+    $fakultas = $_POST['fakultas'];
+    $bidang_keahlian = $_POST['bidang_keahlian'];
     $role = $_POST['role'];
 
     if (!$nama || !$email || !$password || !$role) {
-        $error = "Nama, email, password, dan role wajib diisi.";
+        $error = "Semua field wajib diisi.";
     } else {
-        // Escaping opsional value
-        $nim = $nim ? "'" . mysqli_real_escape_string($koneksi, $nim) . "'" : "NULL";
-        $angkatan = $angkatan ? "'" . mysqli_real_escape_string($koneksi, $angkatan) . "'" : "NULL";
-        $fakultas = $fakultas ? "'" . mysqli_real_escape_string($koneksi, $fakultas) . "'" : "NULL";
-        $bidang_keahlian = $bidang_keahlian ? "'" . mysqli_real_escape_string($koneksi, $bidang_keahlian) . "'" : "NULL";
-
         $sql = "INSERT INTO users (nama, email, password, role, nim, angkatan, fakultas, bidang_keahlian)
-                VALUES ('$nama', '$email', '$password', '$role', $nim, $angkatan, $fakultas, $bidang_keahlian)";
+                VALUES ('$nama', '$email', '$password', '$role', '$nim', '$angkatan', '$fakultas', '$bidang_keahlian')";
 
         if (mysqli_query($koneksi, $sql)) {
             header("Location: ../public/dashboard-admin.php?success=akun-ditambahkan");
@@ -61,13 +55,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <?php
             $fields = [
-                ['label' => 'Nama Lengkap', 'name' => 'nama', 'icon' => 'user', 'type' => 'text', 'required' => true],
-                ['label' => 'Email', 'name' => 'email', 'icon' => 'mail', 'type' => 'email', 'required' => true],
-                ['label' => 'Password', 'name' => 'password', 'icon' => 'lock', 'type' => 'text', 'required' => true],
-                ['label' => 'NIM', 'name' => 'nim', 'icon' => 'hash', 'type' => 'text', 'required' => false],
-                ['label' => 'Angkatan', 'name' => 'angkatan', 'icon' => 'calendar', 'type' => 'text', 'required' => false],
-                ['label' => 'Fakultas', 'name' => 'fakultas', 'icon' => 'book', 'type' => 'text', 'required' => false],
-                ['label' => 'Bidang Keahlian', 'name' => 'bidang_keahlian', 'icon' => 'briefcase', 'type' => 'text', 'required' => false]
+                ['label' => 'Nama Lengkap', 'name' => 'nama', 'icon' => 'user', 'type' => 'text'],
+                ['label' => 'Email', 'name' => 'email', 'icon' => 'mail', 'type' => 'email'],
+                ['label' => 'Password', 'name' => 'password', 'icon' => 'lock', 'type' => 'text'],
+                ['label' => 'NIM', 'name' => 'nim', 'icon' => 'hash', 'type' => 'text'],
+                ['label' => 'Angkatan', 'name' => 'angkatan', 'icon' => 'calendar', 'type' => 'text'],
+                ['label' => 'Fakultas', 'name' => 'fakultas', 'icon' => 'book', 'type' => 'text'],
+                ['label' => 'Bidang Keahlian', 'name' => 'bidang_keahlian', 'icon' => 'briefcase', 'type' => 'text']
             ];
 
             foreach ($fields as $f): ?>
@@ -75,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="block text-sm font-medium text-gray-700 mb-1"><?= $f['label'] ?></label>
                     <div class="flex items-center border rounded-lg px-3">
                         <i data-feather="<?= $f['icon'] ?>" class="text-gray-400"></i>
-                        <input type="<?= $f['type'] ?>" name="<?= $f['name'] ?>" <?= $f['required'] ? 'required' : '' ?>
+                        <input type="<?= $f['type'] ?>" name="<?= $f['name'] ?>" required
                             class="w-full px-2 py-2 focus:outline-none" />
                     </div>
                 </div>

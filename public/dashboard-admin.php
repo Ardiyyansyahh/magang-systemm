@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 $jumlah_mahasiswa = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM users WHERE role = 'mahasiswa'"));
 $jumlah_dosen = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM users WHERE role = 'dosen'"));
+$jumlah_perusahaan = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM perusahaan_mitra"));
 $jumlah_magang = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM pendaftaran_magang WHERE status = 'Disetujui'"));
 $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE role != 'admin' ORDER BY role, nama");
 ?>
@@ -31,8 +32,13 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
             <div class="flex items-center space-x-2">
                 <h1 class="text-xl font-bold">SIMAGA</h1>
                 <span class="text-sm bg-purple-700 px-2 py-0.5 rounded">Admin</span>
+
             </div>
-            <button id="logout-admin" class="bg-purple-700 hover:bg-purple-800 px-3 py-1 rounded text-sm">Logout</button>
+            <div>
+                <a href=".../login.html" class="bg-purple-500 text-white px-2 py-2 rounded">Logout</a>
+            </div>
+
+
         </div>
 
         <div class="p-6">
@@ -51,7 +57,7 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                 <div class="bg-blue-50 p-4 rounded-lg border">
                     <h3 class="text-blue-800 mb-2 font-medium">Total Dosen</h3>
                     <p class="text-2xl font-bold text-blue-600"><?= $jumlah_dosen ?></p>
-                    <p class="text-xs text-gray-500">pembimbing</p>
+                    <p class="text-xs text-gray-500">Magang</p>
                 </div>
                 <div class="bg-green-50 p-4 rounded-lg border">
                     <h3 class="text-green-800 mb-2 font-medium">Magang Aktif</h3>
@@ -60,7 +66,7 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                 </div>
                 <div class="bg-amber-50 p-4 rounded-lg border">
                     <h3 class="text-amber-800 mb-2 font-medium">Perusahaan</h3>
-                    <p class="text-2xl font-bold text-amber-600">42</p>
+                    <p class="text-2xl font-bold text-amber-600"><?= $jumlah_perusahaan ?></p>
                     <p class="text-xs text-gray-500">mitra magang</p>
                 </div>
             </div>
@@ -69,32 +75,50 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                 <div class="bg-white border rounded-lg">
                     <div class="border-b px-4 py-3 flex justify-between items-center">
                         <h3 class="font-medium">Manajemen Pengguna</h3>
-                        <a href="../admin/tambah-akun.php" class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">+ Tambah</a>
+                        <a href="../admin/tambah-akun.php"
+                            class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">+ Tambah</a>
                     </div>
                     <div class="p-4">
                         <div class="overflow-y-auto max-h-64">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead>
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peran</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                        <th
+                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            NPm</th>
+                                        <th
+                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Nama</th>
+                                        <th
+                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Peran</th>
+                                        <th
+                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th
+                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
                                     <?php while ($u = mysqli_fetch_assoc($users)): ?>
                                         <tr>
+                                            <td class="px-4 py-2 text-sm"><?= htmlspecialchars($u['nim']) ?></td>
                                             <td class="px-4 py-2 text-sm"><?= htmlspecialchars($u['nama']) ?></td>
                                             <td class="px-4 py-2 text-sm"><?= ucfirst($u['role']) ?></td>
                                             <td class="px-4 py-2 text-sm">
-                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Aktif</span>
+                                                <span
+                                                    class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Aktif</span>
                                             </td>
                                             <td class="px-4 py-2 text-sm space-x-2">
-                                                <a href="../admin/edit-akun.php?id=<?= $u['id'] ?>" class="text-purple-600 hover:underline">Edit</a>
-                                                <form action="../admin/hapus-akun.php" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus akun ini?')">
-                                                    <input type="hidden" name="nim" value="<?= htmlspecialchars($u['nim']) ?>">
-                                                    <button type="submit" class="text-red-600 hover:underline">Hapus</button>
+                                                <a href="../admin/edit-akun.php?nim=<?= $u['nim'] ?>"
+                                                    class="text-purple-600 hover:underline">Edit</a>
+                                                <form action="../admin/hapus-akun.php" method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus akun ini?')"
+                                                    class="inline">
+                                                    <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                                                    <button type="submit"
+                                                        class="text-red-600 hover:underline">Hapus</button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -108,19 +132,57 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                 <div class="bg-white border rounded-lg">
                     <div class="border-b px-4 py-3 flex justify-between items-center">
                         <h3 class="font-medium">Perusahaan Mitra</h3>
-                        <a href="../admin/tambah-perusahaan.php" class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">+ Tambah</a>
+                        <a href="../admin/tambah-perusahaan.php"
+                            class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">+ Tambah</a>
                     </div>
                     <div class="p-4">
-                        <input type="text" placeholder="Cari perusahaan..." class="w-full text-sm border rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-1 focus:ring-purple-500">
-                        <!-- Tambahkan perusahaan dinamis di sini jika tersedia -->
+                        <div class="overflow-y-auto max-h-64">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Nama</th>
+                                        <th
+                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Alamat</th>
+                                        <th
+                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Kontak</th>
+                                        <th
+                                            class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <?php
+                                    $perusahaan = mysqli_query($koneksi, "SELECT * FROM perusahaan_mitra ORDER BY nama");
+                                    while ($p = mysqli_fetch_assoc($perusahaan)): ?>
+                                        <tr>
+                                            <td class="px-4 py-2 text-sm"><?= htmlspecialchars($p['nama']) ?></td>
+                                            <td class="px-4 py-2 text-sm"><?= htmlspecialchars($p['alamat']) ?></td>
+                                            <td class="px-4 py-2 text-sm"><?= htmlspecialchars($p['kontak']) ?></td>
+                                            <td class="px-4 py-2 text-sm space-x-2">
+                                                <form action="../admin/hapus-perusahaan.php" method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus perusahaan ini?')"
+                                                    class="inline">
+                                                    <input type="hidden" name="id" value="<?= $p['id'] ?>">
+                                                    <button type="submit"
+                                                        class="text-red-600 hover:underline">Hapus</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Monitoring Aktivitas Magang -->
-            <section>
-                <?php
-                $monitoring = mysqli_query($koneksi, "
+                <!-- Monitoring Aktivitas Magang -->
+                <section>
+                    <?php
+                    $monitoring = mysqli_query($koneksi, "
                     SELECT u.nama, pm.status,
                            (SELECT COUNT(*) FROM laporan_mingguan WHERE mahasiswa_id = u.id) AS laporan,
                            (SELECT COUNT(*) FROM laporan_mingguan WHERE mahasiswa_id = u.id AND komentar != '') AS feedback
@@ -128,33 +190,33 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                     JOIN users u ON u.id = pm.mahasiswa_id
                     WHERE pm.status = 'Disetujui'
                 ");
-                ?>
-                <h2 class="text-lg font-semibold text-gray-700 mb-3">Monitoring Aktivitas Magang</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead>
-                            <tr>
-                                <th class="px-4 py-2">Mahasiswa</th>
-                                <th class="px-4 py-2">Status Magang</th>
-                                <th class="px-4 py-2">Laporan Terkirim</th>
-                                <th class="px-4 py-2">Feedback Dosen</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($m = mysqli_fetch_assoc($monitoring)): ?>
+                    ?>
+                    <h2 class="text-lg font-semibold text-gray-700 mb-3">Monitoring Aktivitas Magang</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
                                 <tr>
-                                    <td class="px-4 py-2"><?= htmlspecialchars($m['nama']) ?></td>
-                                    <td class="px-4 py-2 text-green-600"><?= $m['status'] ?></td>
-                                    <td class="px-4 py-2"><?= $m['laporan'] ?></td>
-                                    <td class="px-4 py-2"><?= $m['feedback'] ?> komentar</td>
+                                    <th class="px-4 py-2">Mahasiswa</th>
+                                    <th class="px-4 py-2">Status Magang</th>
+                                    <th class="px-4 py-2">Laporan Terkirim</th>
+                                    <th class="px-4 py-2">Feedback Dosen</th>
                                 </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                            </thead>
+                            <tbody>
+                                <?php while ($m = mysqli_fetch_assoc($monitoring)): ?>
+                                    <tr>
+                                        <td class="px-4 py-2"><?= htmlspecialchars($m['nama']) ?></td>
+                                        <td class="px-4 py-2 text-green-600"><?= $m['status'] ?></td>
+                                        <td class="px-4 py-2"><?= $m['laporan'] ?></td>
+                                        <td class="px-4 py-2"><?= $m['feedback'] ?> komentar</td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
         </div>
-    </div>
 </body>
 
 </html>
