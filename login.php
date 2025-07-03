@@ -24,6 +24,9 @@ if ($result->num_rows === 1) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['nama'] = $user['nama'];
         $_SESSION['role'] = $user['role'];
+        $_SESSION['nim'] = $user['nim'];
+        $_SESSION['fakultas'] = $user['fakultas'];
+        $_SESSION['bidang_keahlian'] = $user['bidang_keahlian'];
 
         switch ($user['role']) {
             case 'mahasiswa':

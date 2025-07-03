@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ['label' => 'NIM', 'name' => 'nim', 'icon' => 'hash', 'type' => 'text', 'required' => false],
                 ['label' => 'Angkatan', 'name' => 'angkatan', 'icon' => 'calendar', 'type' => 'text', 'required' => false],
                 ['label' => 'Fakultas', 'name' => 'fakultas', 'icon' => 'book', 'type' => 'text', 'required' => false],
-                ['label' => 'Bidang Keahlian', 'name' => 'bidang_keahlian', 'icon' => 'briefcase', 'type' => 'text', 'required' => false]
+                ['label' => 'Jurusan', 'name' => 'jurusan', 'icon' => 'briefcase', 'type' => 'text', 'required' => false]
             ];
 
             foreach ($fields as $f): ?>

@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($nama)) {
         $insert = "INSERT INTO perusahaan_mitra (nama, alamat, kontak) VALUES ('$nama', '$alamat', '$kontak')";
         if (mysqli_query($koneksi, $insert)) {
-            header("Location: dashboard-admin.php?perusahaan=success");
+            header("Location: ../public/dashboard-admin.php?perusahaan=success");
             exit;
         } else {
             $error = "Gagal menyimpan data: " . mysqli_error($koneksi);
@@ -33,13 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
     <meta charset="UTF-8">
-    <title>Tambah Perusahaan Mitra</title>
+    <title>Tambah Perusahaan </title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 py-10">
-    <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-2xl font-bold mb-4">Tambah Perusahaan Mitra</h1>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-xl w-full bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4">Tambah Perusahaan</h1>
 
         <?php if (isset($error)): ?>
             <div class="mb-4 text-red-600 bg-red-100 border border-red-300 p-2 rounded">
@@ -62,10 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="flex justify-between items-center">
                 <a href="../public/dashboard-admin.php"
-                    class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">← Kembali</a>
-                <a href="../public/dashboard-admin.php"
-                    class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700"> Simpan</a>
+                    class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">
+                    ← Kembali
+                </a>
+
+                <button type="submit" class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">
+                    Simpan
+                </button>
             </div>
+
 
         </form>
     </div>

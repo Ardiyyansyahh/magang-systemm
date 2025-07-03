@@ -13,7 +13,18 @@ $jumlah_dosen = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM users WHE
 $jumlah_perusahaan = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM perusahaan_mitra"));
 $jumlah_magang = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM pendaftaran_magang WHERE status = 'Disetujui'"));
 $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE role != 'admin' ORDER BY role, nama");
+
+$perusahaan_mahasiswa = mysqli_query($koneksi, "
+    SELECT mitra.nama AS nama_perusahaan, u.nama AS nama_mahasiswa, pm.status
+    FROM pendaftaran_magang pm
+    JOIN perusahaan_mitra mitra ON pm.perusahaan_id = mitra.id
+    JOIN users u ON u.id = pm.mahasiswa_id
+    ORDER BY mitra.nama, u.nama
+");
+
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -85,7 +96,7 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                                     <tr>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            NPm</th>
+                                            NPM</th>
                                         <th
                                             class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Nama</th>
@@ -111,7 +122,7 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                                                     class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Aktif</span>
                                             </td>
                                             <td class="px-4 py-2 text-sm space-x-2">
-                                                <a href="../admin/edit-akun.php?nim=<?= $u['nim'] ?>"
+                                                <a href="../admin/edit-akun.php?id=<?= $u['id'] ?>"
                                                     class="text-purple-600 hover:underline">Edit</a>
                                                 <form action="../admin/hapus-akun.php" method="POST"
                                                     onsubmit="return confirm('Yakin ingin menghapus akun ini?')"
@@ -180,7 +191,7 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                 </div>
 
                 <!-- Monitoring Aktivitas Magang -->
-                <section>
+                <section class="w-full mt-6 bg-white p-6 rounded-xl shadow col-span-full">
                     <?php
                     $monitoring = mysqli_query($koneksi, "
                     SELECT u.nama, pm.status,
@@ -191,6 +202,7 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                     WHERE pm.status = 'Disetujui'
                 ");
                     ?>
+
                     <h2 class="text-lg font-semibold text-gray-700 mb-3">Monitoring Aktivitas Magang</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -215,6 +227,30 @@ $users = mysqli_query($koneksi, "SELECT id, nama, nim, role FROM users WHERE rol
                         </table>
                     </div>
                 </section>
+                <section class="w-full mt-6 bg-white p-6 rounded-xl shadow col-span-full">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-3">Rekap Mahasiswa per Perusahaan Mitra</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2">Perusahaan</th>
+                                    <th class="px-4 py-2">Mahasiswa</th>
+                                    <th class="px-4 py-2">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while ($row = mysqli_fetch_assoc($perusahaan_mahasiswa)): ?>
+                                    <tr>
+                                        <td class="px-4 py-2"><?= htmlspecialchars($row['nama_perusahaan']) ?></td>
+                                        <td class="px-4 py-2"><?= htmlspecialchars($row['nama_mahasiswa']) ?></td>
+                                        <td class="px-4 py-2"><?= htmlspecialchars($row['status']) ?></td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
             </div>
         </div>
 </body>

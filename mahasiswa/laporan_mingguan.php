@@ -35,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Input Laporan Mingguan</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-6">
-<div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+<div class="max-w-xl w-full bg-white p-6 rounded-xl shadow">
     <h1 class="text-xl font-bold mb-4">Input Laporan Mingguan</h1>
 
     <?php if ($error): ?>
