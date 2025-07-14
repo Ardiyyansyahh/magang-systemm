@@ -1,38 +1,83 @@
 <?php
+// Session management yang lebih robust
+ini_set('session.gc_maxlifetime', 3600); // 1 jam
+ini_set('session.cookie_lifetime', 3600);
 session_start();
+
+// Debug session (bisa dihapus di production)
+error_log("Session Debug - User ID: " . ($_SESSION['user_id'] ?? 'not set') . ", Role: " . ($_SESSION['role'] ?? 'not set'));
+
 include '../koneksi.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
-    header("Location: ../login.html");
+// Cek koneksi database
+if (!$koneksi) {
+    error_log("Database connection failed: " . mysqli_connect_error());
+    die("Database connection failed. Please try again later.");
+}
+
+// Cek session dengan error handling yang lebih baik
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'mahasiswa') {
+    error_log("Session invalid - redirecting to login");
+    session_destroy();
+    header("Location: ../login.html?timeout=1");
     exit;
+}
+
+// Regenerate session ID untuk keamanan
+if (!isset($_SESSION['last_regeneration'])) {
+    $_SESSION['last_regeneration'] = time();
+} elseif (time() - $_SESSION['last_regeneration'] > 300) { // 5 menit
+    session_regenerate_id(true);
+    $_SESSION['last_regeneration'] = time();
 }
 
 $id = $_SESSION['user_id'];
 $mahasiswa_id = $_SESSION['user_id'];
 
-$perusahaanList = mysqli_query($koneksi, "SELECT * FROM perusahaan_mitra");
+// Error handling untuk queries dengan try-catch
+try {
+    $perusahaanList = mysqli_query($koneksi, "SELECT * FROM perusahaan_mitra");
+    if (!$perusahaanList) {
+        throw new Exception("Failed to fetch perusahaan data: " . mysqli_error($koneksi));
+    }
 
-// Ambil data pendaftaran magang mahasiswa ini
-$pendaftaran = mysqli_query($koneksi, "SELECT * FROM pendaftaran_magang WHERE mahasiswa_id = $id");
+    // Ambil data pendaftaran magang mahasiswa ini
+    $pendaftaran = mysqli_query($koneksi, "SELECT * FROM pendaftaran_magang WHERE mahasiswa_id = $id");
+    if (!$pendaftaran) {
+        throw new Exception("Failed to fetch pendaftaran data: " . mysqli_error($koneksi));
+    }
 
-// Ambil dokumen magang
-$dokumen = mysqli_query($koneksi, "SELECT * FROM dokumen_magang WHERE mahasiswa_id = $id");
+    // Ambil dokumen magang
+    $dokumen = mysqli_query($koneksi, "SELECT * FROM dokumen_magang WHERE mahasiswa_id = $id");
+    if (!$dokumen) {
+        throw new Exception("Failed to fetch dokumen data: " . mysqli_error($koneksi));
+    }
 
-// Ambil laporan mingguan
-$laporan = mysqli_query($koneksi, "SELECT * FROM laporan_mingguan WHERE mahasiswa_id = $id ORDER BY minggu_ke");
+    // Ambil laporan mingguan
+    $laporan = mysqli_query($koneksi, "SELECT * FROM laporan_mingguan WHERE mahasiswa_id = $id ORDER BY minggu_ke");
+    if (!$laporan) {
+        throw new Exception("Failed to fetch laporan data: " . mysqli_error($koneksi));
+    }
 
-$pendaftaran = mysqli_query($koneksi, "
-    SELECT pm.*, mitra.nama AS nama_perusahaan, mitra.alamat AS alamat_perusahaan
-    FROM pendaftaran_magang pm
-    JOIN perusahaan_mitra mitra ON pm.perusahaan_id = mitra.id
-    WHERE pm.mahasiswa_id = $mahasiswa_id
-    LIMIT 1
-");
+    $pendaftaran = mysqli_query($koneksi, "
+        SELECT pm.*, mitra.nama AS nama_perusahaan, mitra.alamat AS alamat_perusahaan
+        FROM pendaftaran_magang pm
+        JOIN perusahaan_mitra mitra ON pm.perusahaan_id = mitra.id
+        WHERE pm.mahasiswa_id = $mahasiswa_id
+        LIMIT 1
+    ");
+    if (!$pendaftaran) {
+        throw new Exception("Failed to fetch detailed pendaftaran data: " . mysqli_error($koneksi));
+    }
 
-// Hitung statistik untuk dashboard
-$total_laporan = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM laporan_mingguan WHERE mahasiswa_id = $id"));
-$total_dokumen = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM dokumen_magang WHERE mahasiswa_id = $id"));
-$dokumen_approved = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM dokumen_magang WHERE mahasiswa_id = $id AND status_verifikasi = 'Disetujui'"));
+} catch (Exception $e) {
+    error_log("Dashboard error: " . $e->getMessage());
+    // Set default values jika ada error
+    $error_message = "Terjadi kesalahan dalam memuat data. Silakan refresh halaman.";
+}
+
+
+
 
 // Hitung progress magang (berdasarkan tahapan)
 $progress_percentage = 0;
@@ -68,14 +113,24 @@ if ($total_laporan >= 4) {
 
         <!-- Header -->
         <div class="bg-white p-6 rounded-xl shadow">
+            <!-- Error Message Display -->
+
+
             <div class="flex justify-between mb-6">
                 <h1 class="text-2xl font-bold text-blue-700">Dashboard Mahasiswa</h1>
-                <a href="../login.html" class="bg-blue-500 text-white px-4 py-2 rounded">Logout</a>
+                <div class="flex items-center gap-4">
+                    <!-- Session Timer Display -->
+                    <div class="text-sm text-gray-500" id="sessionTimer"></div>
+                    <a href="../logout.php" onclick="return confirmLogout()"
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                        Logout
+                    </a>
+                </div>
             </div>
             <p class="text-gray-700">Nama: <strong><?= $_SESSION['nama'] ?></strong></p>
-            <p class="text-gray-700">NIM: <strong><?= $_SESSION['nim'] ?></strong></p>
+            <p class="text-gray-700">NPM: <strong><?= $_SESSION['nim'] ?></strong></p>
             <p class="text-gray-700">Fakultas: <strong><?= $_SESSION['fakultas'] ?></strong></p>
-            <p class="text-gray-700">Jurusan : <strong><?= $_SESSION['bidang_keahlian'] ?></strong></p>
+            <p class="text-gray-700">Jurusans: <strong><?= $_SESSION['bidang_keahlian'] ?></strong></p>
             <?php
             // Ambil nama perusahaan dari hasil query pendaftaran
             $nama_perusahaan = '-';
@@ -379,21 +434,6 @@ if ($total_laporan >= 4) {
 
     </div>
 
-    <script>
-        feather.replace();
-
-        // Add some interactive features
-        document.addEventListener('DOMContentLoaded', function () {
-            // Animate progress bar on load
-            const progressBar = document.querySelector('.bg-gradient-to-r.from-blue-500.to-purple-600');
-            if (progressBar) {
-                progressBar.style.width = '0%';
-                setTimeout(() => {
-                    progressBar.style.width = '<?= $progress_percentage ?>%';
-                }, 500);
-            }
-        });
-    </script>
 </body>
 
 </html>

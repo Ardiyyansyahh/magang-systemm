@@ -1,12 +1,17 @@
 <?php
-session_start();
-include '../koneksi.php';
+// Include session helper
+require_once '../includes/session_helper.php';
 
-// Cek apakah dosen sudah login
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'dosen') {
-    header("Location: ../login.html");
-    exit;
+// Initialize session dengan konfigurasi yang lebih baik
+initializeSession();
+
+// Validate session dengan role checking
+if (!validateUserSession('dosen')) {
+    logActivity('Session validation failed', 'Redirecting to login');
+    redirectToLogin('Session expired atau tidak valid');
 }
+
+include '../koneksi.php';
 
 $pendaftaranQuery = "
     SELECT pm.id, pm.status, pm.posisi, pm.tanggal_pengajuan, u.nama AS nama, mitra.nama AS perusahaan
@@ -21,8 +26,38 @@ $pendaftaranResult = mysqli_query($koneksi, $pendaftaranQuery);
 $laporanQuery = "SELECT lm.*, u.nama FROM laporan_mingguan lm JOIN users u ON lm.mahasiswa_id = u.id ";
 $laporanResult = mysqli_query($koneksi, $laporanQuery);
 
-// Hitung statistik untuk dashboard
-$total_mahasiswa = mysqli_num_rows(mysqli_query($koneksi, "SELECT id FROM users WHERE role = 'mahasiswa'"));
+// Hitung statistik untuk dashboard dengan error handling
+$total_mahasiswa = 0;
+$pending_approval = 0;
+$pending_documents = 0;
+$total_laporan = 0;
+$rata_nilai = 0;
+
+try {
+    // Total mahasiswa yang mendaftar magang
+    $result = mysqli_query($koneksi, "SELECT DISTINCT mahasiswa_id FROM pendaftaran_magang");
+    $total_mahasiswa = $result ? mysqli_num_rows($result) : 0;
+    
+    // Pending approval
+    $result = mysqli_query($koneksi, "SELECT * FROM pendaftaran_magang WHERE status = 'Menunggu'");
+    $pending_approval = $result ? mysqli_num_rows($result) : 0;
+    
+    // Pending documents
+    $result = mysqli_query($koneksi, "SELECT * FROM dokumen_magang WHERE status_verifikasi = 'Menunggu'");
+    $pending_documents = $result ? mysqli_num_rows($result) : 0;
+    
+    // Total laporan
+    $result = mysqli_query($koneksi, "SELECT * FROM laporan_mingguan");
+    $total_laporan = $result ? mysqli_num_rows($result) : 0;
+    
+    // Hitung rata-rata nilai
+    $avg_query = mysqli_query($koneksi, "SELECT AVG(nilai) as rata_nilai FROM laporan_mingguan WHERE nilai IS NOT NULL");
+    if ($avg_query && $avg_result = mysqli_fetch_assoc($avg_query)) {
+        $rata_nilai = $avg_result['rata_nilai'] ? round($avg_result['rata_nilai'], 1) : 0;
+    }
+} catch (Exception $e) {
+    error_log("Database error in dashboard: " . $e->getMessage());
+}
 
 
 ?>
